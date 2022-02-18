@@ -17,7 +17,9 @@ limitations under the License.
 #include <avr/io.h>
 #include <util/delay.h>
 #include "nfcemulator.h"
-							                                                                   
+
+#define NULL (void *)0
+
 uint8_t tagStorage[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE1, 0x10, 0x80, 0x00, //Byte  0 to 15:
                         0x03, 0xFF, 0x00, 0xB4, 0xC2, 0x09, 0x00, 0x00, 0x00, 0xA5, 0x74, 0x65, 0x78, 0x74, 0x2F, 0x68, //Byte 16 to 31:
                         0x74, 0x6D, 0x6C, 0xEF, 0xBB, 0xBF, 0x3C, 0x68, 0x74, 0x6D, 0x6C, 0x3E, 0x3C, 0x62, 0x6F, 0x64, //...
@@ -34,11 +36,19 @@ uint8_t tagStorage[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x
 						
 //Byte 14 (value=0x80=1024/8) specifies tag size in bytes divided by 8
 //Byte 18, 19 specify NDEF-Message size, Byte 20..35 is NDEF-header, content starts at Byte 36
-								
+
 int main(void)
 {
+    DDRB |= 0b00000010;
+
+    for(unsigned i = 0; i <= 100; i++)
+    {
+        i % 4 == 0? PORTB &= ~(0b10) : 0;
+        i % 6 == 0? PORTB |= 0b10 : 0;
+        _delay_ms(3);
+    }
 	setupNfcEmulator(tagStorage, sizeof(tagStorage));
-		  	
+
 	while(1)
 	{
 		//do other stuff
@@ -47,3 +57,4 @@ int main(void)
 	}
 }
 
+int test = _SFR_ASM_COMPAT;

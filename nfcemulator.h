@@ -29,12 +29,15 @@ limitations under the License.
 
 #define SUBC_OVF (uint8_t)(F_CPU / 847500.0 / 2.0 + 0.5 - 1) //847500 Hz Subcarrier
 
-#define S_IDLE 0
-#define S_READY 1
-#define S_ACTIVE 2
-#define S_HALT 8
-#define S_READY_H 9
-#define S_ACTIVE_H 10
+typedef enum nfc_state_s
+{
+    S_IDLE,
+    S_READY,
+    S_ACTIVE,
+    S_HALT = 8,
+    S_READY_H,
+    S_ACTIVE_H,
+} nfc_state_t;
 
 void setupNfcEmulator(uint8_t *storage, uint16_t storageSize);
 void checkForNfcReader();

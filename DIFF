@@ -1,0 +1,63 @@
+nfcemulator.c: In function ‘setupNfcEmulator’:
+nfcemulator.c:57:2: error: ‘TCCR1B’ undeclared (first use in this function)
+  TCCR1B = (1<<WGM12) | (1<<CS10);
+  ^
+nfcemulator.c:57:2: note: each undeclared identifier is reported only once for each function it appears in
+nfcemulator.c:57:15: error: ‘WGM12’ undeclared (first use in this function)
+  TCCR1B = (1<<WGM12) | (1<<CS10);
+               ^
+nfcemulator.c:63:2: warning: implicit declaration of function ‘addCrc16’ [-Wimplicit-function-declaration]
+  addCrc16(HLTA);
+  ^
+nfcemulator.c:64:2: warning: implicit declaration of function ‘addBcc’ [-Wimplicit-function-declaration]
+  addBcc(CT_UID1);
+  ^
+nfcemulator.c: At top level:
+nfcemulator.c:71:6: warning: conflicting types for ‘addCrc16’
+ void addCrc16(uint8_t *Data, uint8_t Length)
+      ^
+nfcemulator.c:63:2: note: previous implicit declaration of ‘addCrc16’ was here
+  addCrc16(HLTA);
+  ^
+nfcemulator.c:90:6: warning: conflicting types for ‘addBcc’
+ void addBcc(uint8_t *Data) //add exclusive-OR of 4 bytes
+      ^
+nfcemulator.c:64:2: note: previous implicit declaration of ‘addBcc’ was here
+  addBcc(CT_UID1);
+  ^
+nfcemulator.c: In function ‘waitForBitend’:
+nfcemulator.c:97:10: error: ‘TIFR1’ undeclared (first use in this function)
+  while(!(TIFR1 & (1<<OCF1A))); //Wait till end of bit-time
+          ^
+nfcemulator.c: In function ‘waitForOneBitTime’:
+nfcemulator.c:112:3: error: ‘OCR1AL’ undeclared (first use in this function)
+   OCR1AL = CLC_PBIT / 2 - 1;
+   ^
+nfcemulator.c: In function ‘txManchester’:
+nfcemulator.c:148:2: error: ‘TIFR1’ undeclared (first use in this function)
+  TIFR1 |= (1<<OCF1A);
+  ^
+nfcemulator.c: In function ‘resetRxFlags’:
+nfcemulator.c:209:2: error: ‘TIFR1’ undeclared (first use in this function)
+  TIFR1 |= (1<<OCF1A); //Clear Timer Overflow Flag 
+  ^
+In file included from nfcemulator.c:19:0:
+nfcemulator.c: In function ‘rxMiller’:
+nfcemulator.h:21:18: warning: large integer implicitly truncated to unsigned type [-Woverflow]
+ #define CLC_PBIT (uint16_t)(128.0 * F_CPU / RFID_FREQU + 0.5)
+                  ^
+nfcemulator.h:24:14: note: in expansion of macro ‘CLC_PBIT’
+ #define CLCL CLC_PBIT * 9 / 4
+              ^
+nfcemulator.c:225:10: note: in expansion of macro ‘CLCL’
+  OCR1A = CLCL-1;
+          ^
+nfcemulator.c:233:9: error: ‘TIFR1’ undeclared (first use in this function)
+  while(~TIFR1 & (1<<OCF1A));
+         ^
+nfcemulator.c: In function ‘checkForNfcReader’:
+nfcemulator.c:341:3: error: ‘AIN1_PORT’ undeclared (first use in this function)
+   AIN1_PORT &= ~(1<<AIN1_BIT); //Deactivate pull up to increase sensitivity
+   ^
+nfcemulator.c:341:21: error: ‘AIN1_BIT’ undeclared (first use in this function)
+   AIN1_PORT &= ~(1<<AIN1_BIT); //Deactivate pull up to increase sensitivity

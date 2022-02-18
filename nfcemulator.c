@@ -44,17 +44,17 @@ uint8_t rCount = 0;
 void setupNfcEmulator(uint8_t *storage, uint16_t storageSize)
 {
 	//clock divider for 8 bit timer0: clk/1 -> 13.5225 MHz
-	TCCR0B |= (1<<CS00);
+	TCCR0B |= (1<<CS00); // PB2
 		
     //8 bit timer0: Toggle OC0A on Compare Match and CTC-Mode
     //for 847.5 kHz subcarrier
     TCCR0A |= (1<<COM0A0) | (1<<WGM01);
 		
 	//set up 847.5 kHz subcarrier for sending (8 bit timer0)
-	OCR0A = SUBC_OVF;
+	OCR1B = SUBC_OVF;
 	
 	//CTC-Mode and no clock divider for 16 bit timer1: clk/1
-	TCCR1B = (1<<WGM12) | (1<<CS10);
+	TCCR0B = (1<<WGM02) | (1<<CS10);
 	
 	//Setup Analog Comparator, Enable (ACD), Set Analog Comparator
 	//Interrupt Flag on Rising Output Edge (ACIS0, ACIS1)
@@ -94,8 +94,8 @@ void addBcc(uint8_t *Data) //add exclusive-OR of 4 bytes
 
 void waitForBitend()
 {
-	while(!(TIFR1 & (1<<OCF1A))); //Wait till end of bit-time
-	TIFR1 |= (1<<OCF1A);
+	while(!(TIFR & (1<<OCF1A))); //Wait till end of bit-time
+	TIFR |= (1<<OCF1A);
 }
 
 #if (F_CPU == RFID_FREQU)
@@ -109,12 +109,12 @@ void waitForOneBitTime()
 { 
 	if (rCount < 7)
 	{
-		OCR1AL = CLC_PBIT / 2 - 1;
+		OCR1B = CLC_PBIT / 2 - 1;
 		rCount++;
 	}
 	else
 	{
-		OCR1AL = CLC_PBIT / 2 - 2;
+		OCR1B = CLC_PBIT / 2 - 2;
 		rCount = 0;
 	}
 	waitForBitend();
@@ -125,12 +125,12 @@ void waitForOneBitTime()
 {
 	if (rCount < 6)
 	{
-		OCR1AL = CLC_PBIT / 2 - 1;
+		FOC1B = CLC_PBIT / 2 - 1;
 		rCount++;
 	}
 	else
 	{
-		OCR1AL = CLC_PBIT / 2;
+		FOC1B = CLC_PBIT / 2;
 		rCount = 0;
 	}
 	waitForBitend();
@@ -145,12 +145,12 @@ void txManchester(uint8_t *data, uint8_t length)
 	uint8_t txbitPos = 0;
 	uint8_t parity = 0;
 	
-	TIFR1 |= (1<<OCF1A);
+	TIFR |= (1<<OCF1A);
 	
 	//Send SOC
 	waitForBitend();
 	DDRB |= (1<<2);
-	OCR1A = CLC_PBIT / 2 - 1; //Set Hi- and Low-Bit
+	OCR1B = CLC_PBIT / 2 - 1; //Set Hi- and Low-Bit
 	waitForOneBitTime();
 	DDRB &= ~(1<<2);
 	
@@ -206,7 +206,7 @@ void txManchester(uint8_t *data, uint8_t length)
 inline void resetRxFlags()
 {
 	TCNT1 = 0;
-	TIFR1 |= (1<<OCF1A); //Clear Timer Overflow Flag 
+	TIFR |= (1<<OCF1A); //Clear Timer Overflow Flag 
 	ACSR |= (1<<ACI); //Clear Analog Comparator Interrupt Flag
 }
 
@@ -222,7 +222,7 @@ uint8_t rxMiller()
 	uint8_t bytePos = 0;
 	uint8_t hbitPos = 0;
 	
-	OCR1A = CLCL-1;
+	OCR1B = CLCL-1;
 	buffer[0] = 0;
 
 	//Wait for transmission end if there is data arriving
@@ -230,15 +230,15 @@ uint8_t rxMiller()
 	{
 		if (ACSR & (1<<ACI)) resetRxFlags();
 	}
-	while(~TIFR1 & (1<<OCF1A));
+	while(~TIFR & (1<<OCF1A));
 	
 	//Wait for transmission end if there is data arriving
 	do
 	{
-		if (TIFR1 & (1<<OCF1A))
+		if (TIFR & (1<<OCF1A))
 		{
 			TCNT1 = 0;
-			TIFR1 |= (1<<OCF1A);
+			TIFR |= (1<<OCF1A);
 			cDown--;
 			if (!cDown) break;
 		}
@@ -269,11 +269,11 @@ uint8_t rxMiller()
 				hbitPos += 2;
 			} //34 or 41 (hbitPos > 17) click cycles
 		}
-		while(~TIFR1 & (1<<OCF1A));
+		while(~TIFR & (1<<OCF1A));
 	}
 	
-	OCR1A = FDT_DELAY[hbitPos & 1]; //Set delay for answer
-	TIFR1 |= (1<<OCF1A);
+	OCR1B = FDT_DELAY[hbitPos & 1]; //Set delay for answer
+	TIFR |= (1<<OCF1A);
 	
 	if (hbitPos > 7) bytePos++;
 
@@ -338,7 +338,7 @@ void checkForNfcReader()
 
 	if (ACSR & (1<<ACI)) //13.56 MHz carrier available?
 	{
-		AIN1_PORT &= ~(1<<AIN1_BIT); //Deactivate pull up to increase sensitivity
+		PORTB &= ~(1<<PB1); //Deactivate pull up to increase sensitivity
 		
 		while(cdow > 0)
 		{
@@ -395,7 +395,7 @@ void checkForNfcReader()
 			
 			cdow -= (bytes == 0);		
 		}
-		AIN1_PORT |= (1<<AIN1_BIT); //Activate pull up to prevent noise from toggling the comparator
+		PORTB |= (1<<PB1); //Activate pull up to prevent noise from toggling the comparator
 	}
 	ACSR |= (1<<ACI); //Clear comparator interrupt flag
 }
