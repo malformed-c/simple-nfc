@@ -125,12 +125,12 @@ void waitForOneBitTime()
 {
 	if (rCount < 6)
 	{
-		FOC1B = CLC_PBIT / 2 - 1;
+		OCR1B = CLC_PBIT / 2 - 1;
 		rCount++;
 	}
 	else
 	{
-		FOC1B = CLC_PBIT / 2;
+		OCR1B = CLC_PBIT / 2;
 		rCount = 0;
 	}
 	waitForBitend();
